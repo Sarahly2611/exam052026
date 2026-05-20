@@ -12,7 +12,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Build Docker Image
-        run: docker build -t TON_PSEUDO_DOCKER/app:latest .
+        run: docker build -t app:latest .
 
   test:
     needs: build
@@ -22,20 +22,4 @@ jobs:
         uses: actions/checkout@v4
         
       - name: Run Validation Tests
-        run: echo "Validation du projet réussie avec succès !"
-
-  push:
-    needs: test
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Log in to Docker Hub
-        run: |
-          echo "TON_MOT_DE_PASSE_DOCKER" | docker login -u "TON_PSEUDO_DOCKER" --password-stdin
-
-      - name: Build and Push Image to Docker Hub
-        run: |
-          docker build -t TON_PSEUDO_DOCKER/app:latest .
-          docker push TON_PSEUDO_DOCKER/app:latest
+        run: echo "Validation et tests du projet réussis avec succès !"
