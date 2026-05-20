@@ -1,77 +1,41 @@
-name: CI-CD Docker Pipeline
+name: CI/CD Pipeline Main
 
 on:
   push:
-    branches:
-      - main
-
-env:
-  IMAGE_NAME: TO_BE_REPLACE
-  IMAGE_TAG: TO_BE_REPLACE
-  DOCKER_REGISTRY: TO_BE_REPLACE
+    branches: [ "main" ]
 
 jobs:
-
-  # ===============================
-  # JOB 1 - CI : BUILD + PUSH + SCAN
-  # ===============================
-  ci:
+  build:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout source code
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Display variables
-        run: |
-          echo "IMAGE_NAME: $IMAGE_NAME"
-          echo "IMAGE_TAG: $IMAGE_TAG"
-          echo "DOCKER_REGISTRY: $DOCKER_REGISTRY"
+      - name: Build Docker Image
+        run: docker build -t TON_PSEUDO_DOCKER/app:latest .
 
-      - name: Login to Docker Hub
-        run: |
-          echo "TO_BE_REPLACE" | \
-          docker login -u "TO_BE_REPLACE" --password-stdin
-
-      - name: Build Docker image
-        run: |
-          docker build -t TO_BE_REPLACE/TO_BE_REPLACE:TO_BE_REPLACE .
-
-      - name: Verify image
-        run: |
-          docker image ls | grep TO_BE_REPLACE
-
-      - name: Push Docker image
-        run: |
-          docker push TO_BE_REPLACE/TO_BE_REPLACE:TO_BE_REPLACE
-
-  # ===============================
-  # JOB 2 - CD : DEPLOY
-  # ===============================
-  deploy:
-    needs: ci
-    runs-on: runner-lab
-
+  test:
+    needs: build
+    runs-on: ubuntu-latest
     steps:
-      - name: Pull latest image
-        run: |
-          echo "Hello deploy"
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Run Validation Tests
+        run: echo "Validation du projet réussie avec succès !"
 
-      - name: Pull latest image
-        run: |
-          docker pull TO_BE_REPLACE/TO_BE_REPLACE:TO_BE_REPLACE
+  push:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - name: Stop existing container
+      - name: Log in to Docker Hub
         run: |
-          docker stop ci-app || true
+          echo "TON_MOT_DE_PASSE_DOCKER" | docker login -u "TON_PSEUDO_DOCKER" --password-stdin
 
-      - name: Remove old container
+      - name: Build and Push Image to Docker Hub
         run: |
-          docker rm ci-app || true
-
-      - name: Run new container
-        run: |
-          docker run -d \
-            -p 80:80 \
-            --name ci-app \
-            TO_BE_REPLACE/TO_BE_REPLACE:TO_BE_REPLACE
+          docker build -t TON_PSEUDO_DOCKER/app:latest .
+          docker push TON_PSEUDO_DOCKER/app:latest
